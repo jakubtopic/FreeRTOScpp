@@ -38,8 +38,8 @@
 #ifndef FREERTOS_FREERTOSPP_TIMERCPP_H
 #define FREERTOS_FREERTOSPP_TIMERCPP_H
 
-#include "FreeRTOS.h"
-#include "timers.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/timers.h"
 
 class Timer {
 public:

@@ -38,7 +38,7 @@
 #ifndef FREERTOS_FREERTOSPP_LOCK_H_
 #define FREERTOS_FREERTOSPP_LOCK_H_
 
-#include "FreeRTOS.h"
+#include "freertos/FreeRTOS.h"
 
 /*
  *

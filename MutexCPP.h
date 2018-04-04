@@ -3,22 +3,22 @@
  * @brief FreeRTOS Mutex Wrapper
  *
  * This file contains a set of lightweight wrappers for mutexes using FreeRTOS
- *
+ * 
  * @copyright (c) 2007-2015 Richard Damon
  * @author Richard Damon <richard.damon@gmail.com>
  * @parblock
  * MIT License:
- *
+ * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * 
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -27,30 +27,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  *
- * It is requested (but not required by license) that any bugs found or
+ * It is requested (but not required by license) that any bugs found or 
  * improvements made be shared, preferably to the author.
  * @endparblock
- *
+ * 
  * @ingroup FreeRTOSCpp
  */
 
 #ifndef MUTEXCPP_H
 #define MUTEXCPP_H
 
-#include "freertos/FreeRTOS.h"
-#include "freertos/semphr.h"
+#include "Lock.h"
+#include "semphr.h"
 
 /**
  * @brief Mutex Wrapper.
  *
  * A Mutex is a basic synchronization primitive allowing mutual exclusion to be
- * handled which also implements priority inheritance. Note, the basic mutex is
- * NOT recursive, ie if a Task has taken the Mutex, it must not try to take it
- * again before giving it. If you need this, use a RecurviseMutex.
+ * handled which also implements priority inheritance. Note, the basic mutex is 
+ * NOT recursive, ie if a Task has taken the Mutex, it must not try to take it 
+ * again before giving it. If you need this, use a RecurviseMutex. 
  *
  * The usage of a Mutex is similar to a semaphore, but the task that takes the
  * Mutex is also supposed to be the Task that eventually gives it back. It also
- * doesn't normally make sense for an ISR to use a Mutex, so no _ISR routines
+ * doesn't normally make sense for an ISR to use a Mutex, so no _ISR routines 
  * have been made available.
  *
  * Example Usage:
@@ -64,18 +64,20 @@
  * @endcode
  *
  * @ingroup FreeRTOSCpp
- * @todo should we make a 'Lock' object that takes/gives the mutex?
- * @todo Support static allocation added in FreeRTOS V9.
  */
 
-class Mutex {
+class Mutex : public Lockable {
 public:
 	/**
 	 * @brief Constructor.
 	 * @param name Name to give mutex, used for Debug Registry if setup
 	 */
 	Mutex(char const* name) {
+#if( configSUPPORT_STATIC_ALLOCATION == 1 )
+		handle = xSemaphoreCreateMutexStatic(&mutexBuffer);
+#else
 		handle = xSemaphoreCreateMutex();
+#endif
 #if configQUEUE_REGISTRY_SIZE > 0
 		vQueueAddToRegistry(handle, name);
 #endif
@@ -105,6 +107,9 @@ private:
     Mutex(Mutex const&) = delete;      ///< We are not copyable.
     void operator =(Mutex const&) = delete;  ///< We are not assignable.
 #endif // __cplusplus
+#if( configSUPPORT_STATIC_ALLOCATION == 1 )
+    StaticSemaphore_t mutexBuffer;
+#endif
 
 };
 
@@ -112,12 +117,12 @@ private:
 /**
  * @brief Recursive Mutex Wrapper.
  *
- * A RecursiveMutex adds the ability to nest takes, so that if you have taken the
- * RecursiveMutex and take it again, this works and requires you to give the
+ * A RecursiveMutex adds the ability to nest takes, so that if you have taken the 
+ * RecursiveMutex and take it again, this works and requires you to give the 
  * RecursiveMutex back as many times as it was taken before it is released.
  *
  * One very common application for this is for messages to the user on a console.
- * Generally, you don't want pieces of a message interrupted by pieces of other
+ * Generally, you don't want pieces of a message interrupted by pieces of other 
  * messages, so message output routines use a mutex on the console port.
  * These routines often use lower level routines that also want to make sure their
  * output isn't interspersed, so each level takes the RecursiveMutex at their start
@@ -134,18 +139,21 @@ private:
  *  mutex.take();
  *  ...
  *  mutex.give();
- * ...
+ * ... 
  * mutex.give();
  *
  * @endcode
  * @ingroup FreeRTOSCpp
- * @todo Support static allocation added in FreeRTOS V9.
  */
 
-class RecursiveMutex {
+class RecursiveMutex : public Lockable{
 public:
 	RecursiveMutex(char const* name) {
+#if( configSUPPORT_STATIC_ALLOCATION == 1 )
+		handle = xSemaphoreCreateRecursiveMutexStatic(&mutexBuffer);
+#else
 		handle = xSemaphoreCreateRecursiveMutex();
+#endif
 #if configQUEUE_REGISTRY_SIZE > 0
 		vQueueAddToRegistry(handle, name);
 #endif
@@ -172,8 +180,10 @@ private:
     RecursiveMutex(RecursiveMutex const&) = delete;      ///< We are not copyable.
     void operator =(RecursiveMutex const&) = delete;  ///< We are not assignable.
 #endif // __cplusplus
+#if( configSUPPORT_STATIC_ALLOCATION == 1 )
+    StaticSemaphore_t mutexBuffer;
+#endif
 };
-
 #endif // configUSE_RECURSIVE_MUTEXES
 
 #endif // MUTEXCPP_H

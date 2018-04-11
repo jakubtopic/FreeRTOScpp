@@ -36,7 +36,6 @@
  *
  **********************************************************************/
 #include <Lock.h>
-#include "IOLib/log.h"
 
 Lock::Lock(Lockable& myLockable, bool mylocked, TickType_t wait) :
 lockable(myLockable),

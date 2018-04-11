@@ -57,7 +57,7 @@
  * | TaskPrio_High         | 0 | 1 | 2 | 3 | 3 | 4 | N-2 | Urgent, Short Deadlines, not much processing       |
  * | TaskPrio_Highest      | 0 | 1 | 2 | 3 | 4 | 5 | N-1 | Critical, do NOW, must be quick (Used by FreeRTOS) |
  *
- * @ingroup FreeRTOSCpp
+ * @ingroup FreeRTOSCpp 
  */
 enum TaskPriority {
 	TaskPrio_Idle = 0,													///< Non-Real Time operations. tasks that don't block

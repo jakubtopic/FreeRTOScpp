@@ -64,7 +64,7 @@
  * return;
  *
  * @endcode
- * @ingroup FreeRTOSCpp
+ * @ingroup FreeRTOSCpp 
  */
 
 class Semaphore  : public Lockable {
